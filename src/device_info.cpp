@@ -1,7 +1,7 @@
 #include "device_info.h"
 #include <WiFi.h>
 
-#define FIRMWARE_VERSION "1.0.0"
+#define FIRMWARE_VERSION "1.0.1"
 #define APP_NAME "sunbox"
 #define DEVICE_MODEL "ESP32"
 

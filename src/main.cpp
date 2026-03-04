@@ -5,6 +5,7 @@
 #include "device_info.h"
 #include "config_manager.h"
 #include "wifi_portal.h"
+#include "aws_iot_manager.h"
 
 const char* ssid = ".TigoWiFi-420920068/0";
 const char* password = "WiFi-96629472";
@@ -44,6 +45,9 @@ void setup()
     }
     // 3) Ya conectado => flujo normal
     otaCheckAndUpdate();    
+
+    // 4) Inicializar AWS IoT
+    awsInit();
 }
 
 void loop()
@@ -51,6 +55,16 @@ void loop()
     // Tu lógica principal
     Serial.println("Tick...");
     delay(1000);
+
+     awsLoop();
+
+    static unsigned long last = 0;
+
+    if(millis() - last > 10000)
+    {
+        awsPublishTelemetry();
+        last = millis();
+    }
 }
 
 /*
