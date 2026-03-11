@@ -30,13 +30,13 @@ bool Aws_ProvisioningManager::begin() {
 void Aws_ProvisioningManager::connectMQTT() {
     String clientId = "Provisioner-" + getDeviceId();
     while (!mqtt.connected()) {
-        Serial.print("Conectando a AWS IoT para aprovisionamiento...");
+        Serial.print("Connecting to AWS IoT for provisioning...");
         if (mqtt.connect(clientId.c_str())) {
-            Serial.println("¡Conectado!");
+            Serial.println("Connected!!!");
         } else {
-            Serial.print("Fallo, rc=");
+            Serial.print("Failed, rc=");
             Serial.print(mqtt.state());
-            Serial.println(" reintentando en 2 segundos...");
+            Serial.println(" Trying again in 2 seconds...");
             delay(2000);
         }
     }
@@ -52,7 +52,7 @@ bool Aws_ProvisioningManager::startProvisioning() {
     requestCertificate();
 
     if (!waitForResponse(certificatePem, 15000)) {
-        Serial.println("Error: No se recibió el certificado de AWS.");
+        Serial.println("Error: AWS certificate not received.");
         return false;
     }
 
@@ -66,16 +66,16 @@ bool Aws_ProvisioningManager::startProvisioning() {
     registerThing();
 
     if (!waitForProvisioning(15000)) {
-        Serial.println("Error: El registro del dispositivo falló en AWS.");
+        Serial.println("Error: Device registration failed on AWS.");
         return false;
     }
 
     // Guardar resultados
     // Supone que tienes una función externa definida para persistir en NVS
-    Serial.println("Certificados: " + instance->certificatePem + " / " + instance->privateKey);
+    Serial.println("Certificates: " + instance->certificatePem + " / " + instance->privateKey);
      aws_saveCertificates(instance->certificatePem, instance->privateKey);
 
-    Serial.println("Aprovisionamiento completado con éxito.");
+    Serial.println("Provisioning completed successfully.");
     return true;
 }
 
@@ -124,7 +124,7 @@ void Aws_ProvisioningManager::mqttCallback(char* topic, byte* payload, unsigned 
     DeserializationError error = deserializeJson(doc, payload, length);
 
     if (error) {
-        Serial.print("Error parseando JSON: ");
+        Serial.print("Error parsing JSON: ");
         Serial.println(error.c_str());
         return;
     }
@@ -136,15 +136,15 @@ void Aws_ProvisioningManager::mqttCallback(char* topic, byte* payload, unsigned 
             instance->certificatePem = doc["certificatePem"].as<String>();
             instance->privateKey = doc["privateKey"].as<String>();
             instance->ownershipToken = doc["certificateOwnershipToken"].as<String>();
-            Serial.println("Certificados recibidos correctamente.");
+            Serial.println("Certificates received correctly.");
         } 
         else if (topicStr.indexOf("provision") >= 0) {
             instance->provisioningSuccess = true;
-            Serial.println("Registro en AWS IoT exitoso.");
+            Serial.println("Registration in AWS IoT successful.");
         }
     } 
     else if (topicStr.endsWith("/rejected")) {
-        Serial.println("Petición RECHAZADA por AWS. Revisa las políticas adjuntas al Claim Certificate.");
+        Serial.println("Request REJECTED by AWS. Please review the policies attached to the Claim Certificate.");
         // Imprimir el error de AWS para debug
         const char* errorCode = doc["errorCode"];
         const char* errorMessage = doc["errorMessage"];

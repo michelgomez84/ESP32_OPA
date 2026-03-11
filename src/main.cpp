@@ -9,8 +9,8 @@
 #include "aws_provisioning_manager.h"
 #include <time.h>
 
-const char* ssid = ".TigoWiFi-420920068/0";
-const char* password = "WiFi-96629472";
+const char* ssid = ".TigoWiFi-420920068/0"; //PLAY DIGITAL
+const char* password = "WiFi-96629472"; // c0n3x10npD
 
 Wifi_Manager wifi_manager;
 Aws_ProvisioningManager aws_provisioning;
@@ -37,7 +37,10 @@ void setup()
     WifiPortalConfig portalCfg;
     portalCfg.apSsid = "SUNBOX_SETUP";
     portalCfg.apPass = "12345678";
+
     //removeWifiConfig(); // Para pruebas: eliminar configuración guardada y forzar portal
+    //aws_removeCertificates(); // Para pruebas: eliminar certificados guardados y forzar reprovisioning
+    
     // 1) Si no hay WiFi guardado => Portal
     if (!loadWifiConfig(ssid, pass))
     {

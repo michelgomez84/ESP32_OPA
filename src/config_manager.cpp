@@ -55,3 +55,11 @@ bool aws_loadCertificates(String& cert, String& key)
     return cert.length() > 0;
 }
 
+
+bool aws_removeCertificates()
+{
+    if(preferences.remove("cert") && preferences.remove("key"))
+    {
+        return true;
+    }    
+}

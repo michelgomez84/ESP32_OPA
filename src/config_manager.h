@@ -15,3 +15,4 @@ bool removeWifiConfig();
 bool aws_isProvisioned();
 void aws_saveCertificates(String cert, String key);
 bool aws_loadCertificates(String& cert, String& key);
+bool aws_removeCertificates();
