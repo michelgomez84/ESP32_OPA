@@ -1,17 +1,16 @@
 #include "aws_iot_manager.h"
 #include "device_info.h"
-
 #include <WiFiClientSecure.h>
 #include <PubSubClient.h>
 #include <ArduinoJson.h>
 #include "aws_certificates.h"
+#include "config_manager.h"
 
 WiFiClientSecure net;
 PubSubClient client(net);
 
-const char* awsEndpoint =
-"ag1np0o0njzia-ats.iot.us-east-1.amazonaws.com";
-
+//const char* awsEndpoint ="ag1np0o0njzia-ats.iot.us-east-1.amazonaws.com";
+const char* awsEndpoint ="a2r8wnw1c348d3-ats.iot.us-east-2.amazonaws.com";
 const int awsPort = 8883;
 
 String deviceId = getDeviceId();
@@ -32,16 +31,23 @@ void messageHandler(char* topic, byte* payload, unsigned int length)
 //Inicializa la conexión con AWS IoT Core. Configura los certificados, establece la conexión MQTT y se suscribe al topic de comandos.
 void awsInit()
 {    
+    String cert;
+    String key;
+    if (!aws_loadCertificates(cert, key)) {
+        Serial.println("Error: AWS certificates not found.");
+        return;
+    }
+
     net.setCACert(AWS_ROOT_CA);
-    net.setCertificate(AWS_DEVICE_CERT);
-    net.setPrivateKey(AWS_PRIVATE_KEY);
+    net.setCertificate(cert.c_str());
+    net.setPrivateKey(key.c_str());
 
     client.setServer(awsEndpoint, awsPort);
     client.setCallback(messageHandler);
 
     Serial.println("Connecting to AWS IoT...");
 
-    while (!client.connect(getDeviceId().c_str()))
+    while (!client.connect(deviceId.c_str()))
     {
         Serial.print(".");
         delay(1000);

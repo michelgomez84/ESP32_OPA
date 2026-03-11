@@ -8,6 +8,8 @@ void configInit()
     preferences.begin("device-config", false);
 }
 
+////////////////////////////
+//// WIFI CONFIG
 void saveWifiConfig(const String& ssid, const String& password)
 {
     preferences.putString("wifi_ssid", ssid);
@@ -29,3 +31,27 @@ bool removeWifiConfig()
         return true;
     }    
 }
+
+////////////////////////////
+//// AWS PROVISIONING 
+
+bool aws_isProvisioned()
+{
+    bool exists = preferences.isKey("cert");
+    return exists;
+}
+
+void aws_saveCertificates(String cert, String key)
+{
+    preferences.putString("cert", cert);
+    preferences.putString("key", key);
+}
+
+bool aws_loadCertificates(String& cert, String& key)
+{
+    cert = preferences.getString("cert", "");
+    key = preferences.getString("key", "");
+
+    return cert.length() > 0;
+}
+

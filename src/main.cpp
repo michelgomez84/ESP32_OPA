@@ -6,9 +6,14 @@
 #include "config_manager.h"
 #include "wifi_portal.h"
 #include "aws_iot_manager.h"
+#include "aws_provisioning_manager.h"
+#include <time.h>
 
 const char* ssid = ".TigoWiFi-420920068/0";
 const char* password = "WiFi-96629472";
+
+Wifi_Manager wifi_manager;
+Aws_ProvisioningManager aws_provisioning;
 
 void setup()
 {
@@ -39,15 +44,29 @@ void setup()
          startCaptivePortal(portalCfg);
     }
     // 2) Si hay pero no conecta => Portal
-    if (!wifiConnect(ssid.c_str(), pass.c_str()))
+    if (!wifi_manager.Connect(ssid.c_str(), pass.c_str()))
     {       
         startCaptivePortal(portalCfg);
     }
     // 3) Ya conectado => flujo normal
     otaCheckAndUpdate();    
+    
+    // 4) AWS IoT Provisioning (si no está provisionado, entra en el proceso)
+    if (!aws_isProvisioned())
+    {
+        aws_provisioning.begin();
 
-    // 4) Inicializar AWS IoT
+        if (aws_provisioning.startProvisioning())
+        {
+            Serial.println("Provisioning completed");
+
+            ESP.restart();
+        }
+    }
+
+    // 5) Inicializar AWS IoT
     awsInit();
+    
 }
 
 void loop()
@@ -63,10 +82,11 @@ void loop()
     if(millis() - last > 10000)
     {
         awsPublishTelemetry();
-        //awsPublishUpdateShadow();
+        awsPublishUpdateShadow();
         last = millis();
     }
 }
+
 
 /*
 void setup() {

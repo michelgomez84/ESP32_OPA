@@ -1,4 +1,13 @@
 #pragma once
 
-bool wifiConnect(const char* ssid, const char* password);
-bool wifiIsConnected();
+class Wifi_Manager
+{
+public:
+
+    bool Connect(const char* ssid, const char* password);
+
+    bool IsConnected();
+
+    void syncTime();   // nuevo método
+
+};
