@@ -10,7 +10,7 @@ WiFiClientSecure net;
 PubSubClient client(net);
 
 //const char* awsEndpoint ="ag1np0o0njzia-ats.iot.us-east-1.amazonaws.com";
-const char* awsEndpoint ="a2r8wnw1c348d3-ats.iot.us-east-2.amazonaws.com";
+const char* awsEndpoint ="a2r8wnw1c348d3-ats.iot.us-east-1.amazonaws.com";
 const int awsPort = 8883;
 
 String deviceId = getDeviceId();
@@ -21,11 +21,27 @@ void messageHandler(char* topic, byte* payload, unsigned int length)
     Serial.println("Message from AWS received");
 
     String msg;
-
     for(int i=0;i<length;i++)
         msg += (char)payload[i];
-
     Serial.println(msg);
+
+
+    StaticJsonDocument<512> doc;
+    deserializeJson(doc, payload, length);
+    String command = doc["command"];
+
+    if (command == "setLockerCode")
+    {        
+        String pin = doc["code"]["pin"];
+        String validUntil = doc["code"]["validUntil"];
+        
+        //save or call function to save the pin and validUntil in the device
+        Serial.println("New PIN Code received:");
+        Serial.println(pin);
+
+        Serial.println("Valid Until:");
+        Serial.println(validUntil);
+    }
 }
 
 //Inicializa la conexión con AWS IoT Core. Configura los certificados, establece la conexión MQTT y se suscribe al topic de comandos.
@@ -56,15 +72,16 @@ void awsInit()
     Serial.println("AWS Connected!!!");
 
     // SUBSCRIBE TOPICS
-    String topicCommands[5] = {
+    String topicCommands[6] = {
     "$aws/things/" + deviceId + "/shadow/get/accepted",
     "$aws/things/" + deviceId + "/shadow/get/rejected",
     "$aws/things/" + deviceId + "/shadow/update/accepted",
     "$aws/things/" + deviceId + "/shadow/update/rejected",
-    "$aws/things/" + deviceId + "/shadow/update/delta"
+    "$aws/things/" + deviceId + "/shadow/update/delta",
+    "$aws/things/" + deviceId + "/command"
     };
 
-    for (int i = 0; i < 5; i++){
+    for (int i = 0; i < 6; i++){
         if(client.subscribe(topicCommands[i].c_str())){
             Serial.println("Subscribed to topic: " + topicCommands[i]);
             delay(250);
@@ -118,6 +135,7 @@ void awsPublishUpdateShadow()
 
     client.publish(topic.c_str(), buffer);
 }
+
 
 /*
 {

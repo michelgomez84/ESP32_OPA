@@ -84,8 +84,8 @@ void loop()
 
     if(millis() - last > 10000)
     {
-        awsPublishTelemetry();
-        awsPublishUpdateShadow();
+        //awsPublishTelemetry();
+        //awsPublishUpdateShadow();
         last = millis();
     }
 }

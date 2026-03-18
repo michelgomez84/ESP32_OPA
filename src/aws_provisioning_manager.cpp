@@ -4,7 +4,7 @@
 #include "config_manager.h"
 
 // Configuración de AWS
-const char* awsEndpoint1 = "a2r8wnw1c348d3-ats.iot.us-east-2.amazonaws.com";
+const char* awsEndpoint1 = "a2r8wnw1c348d3-ats.iot.us-east-1.amazonaws.com";
 const int awsPort1 = 8883;
 const char* provisioningTemplate = "ESP32_Test_Template";
 
@@ -28,7 +28,8 @@ bool Aws_ProvisioningManager::begin() {
 }
 
 void Aws_ProvisioningManager::connectMQTT() {
-    String clientId = "Provisioner-" + getDeviceId();
+    //String clientId = "Provisioner-" + getDeviceId();
+    String clientId = getDeviceId();
     while (!mqtt.connected()) {
         Serial.print("Connecting to AWS IoT for provisioning...");
         if (mqtt.connect(clientId.c_str())) {
